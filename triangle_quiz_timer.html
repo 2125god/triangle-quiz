@@ -1,0 +1,333 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#app{padding:1rem 0;font-family:var(--font-sans);max-width:660px}
+
+.start-screen{text-align:center;padding:2rem 1rem}
+.start-title{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:.5rem}
+.start-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:2rem;line-height:1.6}
+.diff-row{display:flex;gap:10px;justify-content:center;margin-bottom:1.5rem}
+.diff-btn{padding:8px 20px;border:0.5px solid var(--color-border-secondary);border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--color-text-secondary);transition:all .15s}
+.diff-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.start-btn{padding:12px 40px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:15px;font-weight:500;cursor:pointer;background:transparent;color:var(--color-text-primary);transition:background .15s}
+.start-btn:hover{background:var(--color-background-secondary)}
+
+.quiz-screen{display:none}
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.hud-item{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 14px;display:flex;align-items:center;gap:6px}
+.hud-label{font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em}
+.hud-val{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.timer-bar-wrap{flex:1;height:6px;background:var(--color-border-tertiary);border-radius:3px;overflow:hidden}
+.timer-bar{height:100%;border-radius:3px;background:#1D9E75;transition:width .1s linear,background .3s}
+.timer-bar.warn{background:#BA7517}
+.timer-bar.danger{background:#E24B4A}
+
+.q-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem;background:var(--color-background-primary);margin-bottom:1rem}
+.q-meta{font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between}
+.q-badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
+.q-badge.easy{background:#E1F5EE;color:#085041}
+.q-badge.medium{background:#FAEEDA;color:#633806}
+.q-badge.hard{background:#FCEBEB;color:#791F1F}
+.q-text{font-size:16px;font-weight:500;color:var(--color-text-primary);line-height:1.5;margin-bottom:1.25rem}
+.q-svg{display:flex;justify-content:center;margin-bottom:1rem}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{padding:12px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);text-align:left;line-height:1.4;transition:all .15s;display:flex;align-items:center;gap:8px}
+.opt:hover:not(:disabled){background:var(--color-background-secondary);border-color:var(--color-border-primary)}
+.opt .opt-letter{width:22px;height:22px;border-radius:50%;border:0.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:var(--color-text-tertiary)}
+.opt.correct{background:#E1F5EE;border-color:#1D9E75;color:#085041}
+.opt.correct .opt-letter{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.opt.wrong{background:#FCEBEB;border-color:#E24B4A;color:#791F1F}
+.opt.wrong .opt-letter{background:#E24B4A;border-color:#E24B4A;color:#fff}
+.opt.reveal{background:#E1F5EE;border-color:#1D9E75;color:#085041;opacity:.75}
+.opt.reveal .opt-letter{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.opt.timeout{background:#FAEEDA;border-color:#BA7517;color:#633806}
+
+.explain-bar{border-radius:var(--border-radius-md);padding:10px 14px;font-size:13px;line-height:1.5;margin-bottom:1rem;display:none}
+.explain-bar.show{display:block}
+.explain-bar.ok{background:#E1F5EE;color:#085041;border:0.5px solid #1D9E75}
+.explain-bar.no{background:#FCEBEB;color:#791F1F;border:0.5px solid #E24B4A}
+.explain-bar.time{background:#FAEEDA;color:#633806;border:0.5px solid #BA7517}
+
+.next-btn{width:100%;padding:11px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;font-size:14px;font-weight:500;cursor:pointer;color:var(--color-text-primary);transition:background .15s;display:none}
+.next-btn.show{display:block}
+.next-btn:hover{background:var(--color-background-secondary)}
+
+.result-screen{display:none;text-align:center;padding:1.5rem 0}
+.result-ring{width:96px;height:96px;border-radius:50%;border:3px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:28px;font-weight:500;color:var(--color-text-primary)}
+.result-ring.gold{border-color:#BA7517;color:#633806;background:#FAEEDA}
+.result-ring.silver{border-color:#888780;color:#444441;background:#F1EFE8}
+.result-ring.bronze{border-color:#1D9E75;color:#085041;background:#E1F5EE}
+.result-title{font-size:20px;font-weight:500;color:var(--color-text-primary);margin-bottom:.4rem}
+.result-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.5rem;line-height:1.6}
+.stats-row{display:flex;gap:10px;margin-bottom:1.5rem}
+.stat{flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;text-align:center}
+.stat-n{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.stat-l{font-size:11px;color:var(--color-text-tertiary);margin-top:3px}
+.review-list{margin-bottom:1.5rem;text-align:left}
+.rev-item{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:8px;font-size:13px;display:flex;align-items:flex-start;gap:10px}
+.rev-icon{width:18px;height:18px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500}
+.rev-icon.ok{background:#1D9E75;color:#fff}
+.rev-icon.no{background:#E24B4A;color:#fff}
+.rev-icon.tm{background:#BA7517;color:#fff}
+.rev-q{color:var(--color-text-primary);line-height:1.4;flex:1}
+.rev-a{color:var(--color-text-secondary);font-size:12px;margin-top:3px}
+.restart-btn{padding:11px 36px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;font-size:14px;font-weight:500;cursor:pointer;color:var(--color-text-primary);transition:background .15s}
+.restart-btn:hover{background:var(--color-background-secondary)}
+
+@media(prefers-color-scheme:dark){
+.opt.correct{background:#04342C;border-color:#1D9E75;color:#9FE1CB}
+.opt.correct .opt-letter{background:#1D9E75;color:#fff}
+.opt.wrong{background:#501313;border-color:#E24B4A;color:#F7C1C1}
+.opt.wrong .opt-letter{background:#E24B4A;color:#fff}
+.opt.reveal{background:#04342C;border-color:#1D9E75;color:#9FE1CB;opacity:.7}
+.opt.reveal .opt-letter{background:#1D9E75;color:#fff}
+.opt.timeout{background:#412402;border-color:#854F0B;color:#FAC775}
+.explain-bar.ok{background:#04342C;color:#9FE1CB;border-color:#1D9E75}
+.explain-bar.no{background:#501313;color:#F7C1C1;border-color:#E24B4A}
+.explain-bar.time{background:#412402;color:#FAC775;border-color:#854F0B}
+.q-badge.easy{background:#04342C;color:#9FE1CB}
+.q-badge.medium{background:#412402;color:#FAC775}
+.q-badge.hard{background:#501313;color:#F7C1C1}
+.result-ring.gold{background:#412402;border-color:#BA7517;color:#FAC775}
+.result-ring.silver{background:#444441;border-color:#888780;color:#D3D1C7}
+.result-ring.bronze{background:#04342C;border-color:#1D9E75;color:#9FE1CB}
+}
+</style>
+
+<h2 style="position:absolute;left:-9999px">Вікторина з таймером: ознаки рівності трикутників</h2>
+<div id="app">
+
+<div id="start-screen" class="start-screen">
+  <div class="start-title">Ознаки рівності трикутників</div>
+  <div class="start-sub">Вікторина з таймером — 12 питань.<br>Відповідай швидко, за кожну швидку відповідь — бонусні очки!</div>
+  <div class="diff-row">
+    <button class="diff-btn active" onclick="setDiff('easy',this)">Легко <span style="font-size:11px;opacity:.6">20 с</span></button>
+    <button class="diff-btn" onclick="setDiff('medium',this)">Середньо <span style="font-size:11px;opacity:.6">15 с</span></button>
+    <button class="diff-btn" onclick="setDiff('hard',this)">Складно <span style="font-size:11px;opacity:.6">10 с</span></button>
+  </div>
+  <button class="start-btn" onclick="startQuiz()"><i class="ti ti-player-play" style="font-size:16px;vertical-align:-2px;margin-right:6px" aria-hidden="true"></i>Старт</button>
+</div>
+
+<div id="quiz-screen" class="quiz-screen">
+  <div class="hud">
+    <div class="hud-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+      <span class="hud-label">Питання</span>
+      <span class="hud-val" id="hud-q">1 / 12</span>
+    </div>
+    <div class="hud-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+      <span class="hud-label">Рахунок</span>
+      <span class="hud-val" id="hud-score">0</span>
+    </div>
+    <div class="hud-item" style="flex-direction:column;align-items:flex-start;gap:2px;min-width:52px">
+      <span class="hud-label">Час</span>
+      <span class="hud-val" id="hud-time">15</span>
+    </div>
+    <div style="flex:1">
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    </div>
+  </div>
+  <div class="q-card">
+    <div class="q-meta">
+      <span id="q-num-label" style="color:var(--color-text-tertiary);font-size:11px"></span>
+      <span class="q-badge" id="q-badge">середньо</span>
+    </div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-svg" id="q-svg"></div>
+    <div class="opts" id="opts"></div>
+  </div>
+  <div class="explain-bar" id="explain-bar"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQ()">Далі →</button>
+</div>
+
+<div id="result-screen" class="result-screen">
+  <div class="result-ring" id="r-ring"></div>
+  <div class="result-title" id="r-title"></div>
+  <div class="result-sub" id="r-sub"></div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n" id="st-correct"></div><div class="stat-l">правильно</div></div>
+    <div class="stat"><div class="stat-n" id="st-wrong"></div><div class="stat-l">помилок</div></div>
+    <div class="stat"><div class="stat-n" id="st-time"></div><div class="stat-l">часу вийшло</div></div>
+    <div class="stat"><div class="stat-n" id="st-score"></div><div class="stat-l">очків</div></div>
+  </div>
+  <div class="review-list" id="review-list"></div>
+  <button class="restart-btn" onclick="goStart()"><i class="ti ti-refresh" style="font-size:16px;vertical-align:-2px;margin-right:6px" aria-hidden="true"></i>Грати знову</button>
+</div>
+
+</div>
+
+<script>
+const SVGS={
+  sks:`<svg width="110" height="80" viewBox="0 0 110 80"><polygon points="8,72 55,8 102,72" fill="none" stroke="#1D9E75" stroke-width="1.5"/><line x1="8" y1="72" x2="55" y2="8" stroke="#E24B4A" stroke-width="2.5"/><line x1="55" y1="8" x2="102" y2="72" stroke="#378ADD" stroke-width="2.5"/><path d="M55,8 Q46,25 63,26" fill="none" stroke="#BA7517" stroke-width="1.5"/><text x="26" y="50" font-size="11" fill="#E24B4A" text-anchor="middle">a</text><text x="57" y="11" font-size="11" fill="#BA7517">∠</text><text x="82" y="50" font-size="11" fill="#378ADD">b</text></svg>`,
+  ksk:`<svg width="110" height="80" viewBox="0 0 110 80"><polygon points="10,72 100,72 55,12" fill="none" stroke="#1D9E75" stroke-width="1.5"/><line x1="10" y1="72" x2="100" y2="72" stroke="#E24B4A" stroke-width="2.5"/><path d="M10,72 Q20,62 27,72" fill="none" stroke="#378ADD" stroke-width="1.5"/><path d="M100,72 Q90,62 83,72" fill="none" stroke="#378ADD" stroke-width="1.5"/><text x="55" y="79" font-size="11" fill="#E24B4A" text-anchor="middle">c</text><text x="9" y="70" font-size="11" fill="#378ADD">α</text><text x="86" y="70" font-size="11" fill="#378ADD">β</text></svg>`,
+  sss:`<svg width="110" height="80" viewBox="0 0 110 80"><polygon points="55,8 102,72 8,72" fill="none" stroke="#1D9E75" stroke-width="1.5"/><line x1="55" y1="8" x2="102" y2="72" stroke="#E24B4A" stroke-width="2"/><line x1="55" y1="8" x2="8" y2="72" stroke="#378ADD" stroke-width="2"/><line x1="8" y1="72" x2="102" y2="72" stroke="#BA7517" stroke-width="2"/><text x="82" y="46" font-size="11" fill="#E24B4A">a</text><text x="22" y="46" font-size="11" fill="#378ADD">b</text><text x="52" y="79" font-size="11" fill="#BA7517">c</text></svg>`,
+  right:`<svg width="110" height="80" viewBox="0 0 110 80"><polygon points="12,72 12,14 95,72" fill="none" stroke="#1D9E75" stroke-width="1.5"/><rect x="12" y="62" width="10" height="10" fill="none" stroke="#1D9E75" stroke-width="1.2"/><line x1="12" y1="14" x2="95" y2="72" stroke="#E24B4A" stroke-width="2.5"/><text x="52" y="78" font-size="10" fill="#E24B4A" text-anchor="middle">гіпот.</text></svg>`,
+  none:``
+};
+
+const ALL_Q=[
+  {text:"Яка ознака: дві сторони і кут між ними?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Четверта"],ans:0,diff:"easy",svg:"sks",explain:"Перша ознака (С–К–С): дві сторони і КУТ МІЖ НИМИ. Головне — кут знаходиться саме між двома рівними сторонами."},
+  {text:"Яка ознака: сторона і два прилеглих кути?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Немає такої"],ans:1,diff:"easy",svg:"ksk",explain:"Друга ознака (К–С–К): сторона і два кути, що прилягають до неї з обох боків."},
+  {text:"Яка ознака: три сторони рівні?",opts:["Перша","Друга","Третя (С–С–С)","Жодна"],ans:2,diff:"easy",svg:"sss",explain:"Третя ознака (С–С–С): якщо всі три сторони рівні — трикутники рівні."},
+  {text:"△ABC і △DEF: AB=DE, ∠B=∠E, BC=EF. Яка ознака?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Недостатньо даних"],ans:0,diff:"medium",svg:"sks",explain:"AB=DE та BC=EF — дві сторони. ∠B=∠E — кут між ними (між AB і BC). Це перша ознака."},
+  {text:"△ABC і △KMN: ∠A=∠K, AB=KM, ∠B=∠M. Яка ознака?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Неможливо визначити"],ans:1,diff:"medium",svg:"ksk",explain:"AB=KM — сторона. ∠A=∠K та ∠B=∠M — два кути, що прилягають до неї. Це друга ознака."},
+  {text:"Чи рівні трикутники, якщо у них рівні три кути?",opts:["Так, за третьою ознакою","Ні — вони лише подібні","Так, за другою ознакою","Тільки для прямокутних"],ans:1,diff:"medium",svg:"none",explain:"Рівність трьох кутів — ознака ПОДІБНОСТІ, а не рівності. Трикутники можуть мати однакові кути, але різні розміри."},
+  {text:"Дві сторони і кут, що НЕ лежить між ними. Цього достатньо?",opts:["Так, це перша ознака","Ні — недостатня умова","Так, для гострих трикутників","Так, якщо трикутники прямокутні"],ans:1,diff:"hard",svg:"none",explain:"Кут має бути САМЕ МІЖ двома сторонами. Якщо кут не між ними — можна побудувати два різних трикутника з такими умовами."},
+  {text:"Для прямокутних трикутників: рівні гіпотенуза і один катет. Яка ознака використовується?",opts:["Особлива ознака — гіпотенуза і катет","Перша ознака (С–К–С)","Друга ознака (К–С–К)","Третя ознака (С–С–С)"],ans:0,diff:"medium",svg:"right",explain:"Для прямокутних трикутників є окрема ознака: рівність гіпотенузи і катета достатня для рівності."},
+  {text:"Скільки ознак рівності довільних трикутників?",opts:["2","3","4","5"],ans:1,diff:"easy",svg:"none",explain:"Три класичні ознаки: перша (С–К–С), друга (К–С–К), третя (С–С–С)."},
+  {text:"△ABC=△DEF означає, що...",opts:["Трикутники подібні","Трикутники рівні — збігаються при накладанні","Рівні тільки кути","Рівні тільки сторони"],ans:1,diff:"easy",svg:"none",explain:"Знак = між трикутниками означає рівність — вони збігаються при накладанні. Рівні ВСІ відповідні сторони і ВСІ відповідні кути."},
+  {text:"AB=PQ, AC=PR, BC=QR. Яка ознака рівності △ABC і △PQR?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Недостатньо даних"],ans:2,diff:"medium",svg:"sss",explain:"Три пари рівних сторін — третя ознака (С–С–С)."},
+  {text:"Яка умова є зайвою, якщо вже задана перша ознака (є дві сторони і кут між ними)?",opts:["Третя сторона","Другий кут","Обидві зайві","Жодна — потрібні всі"],ans:2,diff:"hard",svg:"none",explain:"Якщо відомі дві сторони і кут між ними (перша ознака), трикутник повністю визначений. Третя сторона і решта кутів визначаються автоматично."}
+];
+
+let diff='medium', timeLimit=15;
+let qList=[], qIdx=0, score=0, timerVal=0, timerInt=null, answered=false;
+let results=[];
+
+function setDiff(d,btn){
+  diff=d;
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function startQuiz(){
+  timeLimit=diff==='easy'?20:diff==='medium'?15:10;
+  qList=[...ALL_Q].sort(()=>Math.random()-.5);
+  qIdx=0;score=0;results=[];
+  document.getElementById('start-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  renderQ();
+}
+
+function renderQ(){
+  answered=false;
+  const q=qList[qIdx];
+  document.getElementById('hud-q').textContent=(qIdx+1)+' / '+qList.length;
+  document.getElementById('hud-score').textContent=score;
+  document.getElementById('q-num-label').textContent='Питання '+(qIdx+1);
+  const badge=document.getElementById('q-badge');
+  badge.textContent=q.diff==='easy'?'легко':q.diff==='medium'?'середньо':'складно';
+  badge.className='q-badge '+(q.diff==='easy'?'easy':q.diff==='medium'?'medium':'hard');
+  document.getElementById('q-text').textContent=q.text;
+  document.getElementById('q-svg').innerHTML=SVGS[q.svg]||'';
+  const opts=document.getElementById('opts');
+  const letters=['А','Б','В','Г'];
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML=`<span class="opt-letter">${letters[i]}</span>${o}`;
+    btn.onclick=()=>selectAns(i);
+    opts.appendChild(btn);
+  });
+  document.getElementById('explain-bar').className='explain-bar';
+  document.getElementById('explain-bar').textContent='';
+  document.getElementById('next-btn').className='next-btn';
+  startTimer();
+}
+
+function startTimer(){
+  timerVal=timeLimit;
+  clearInterval(timerInt);
+  updateTimerUI();
+  timerInt=setInterval(()=>{
+    timerVal--;
+    updateTimerUI();
+    if(timerVal<=0){
+      clearInterval(timerInt);
+      onTimeout();
+    }
+  },1000);
+}
+
+function updateTimerUI(){
+  document.getElementById('hud-time').textContent=timerVal;
+  const pct=timerVal/timeLimit*100;
+  const bar=document.getElementById('timer-bar');
+  bar.style.width=pct+'%';
+  bar.className='timer-bar'+(pct<=30?' danger':pct<=60?' warn':'');
+}
+
+function onTimeout(){
+  if(answered) return;
+  answered=true;
+  const q=qList[qIdx];
+  const btns=document.querySelectorAll('.opt');
+  btns.forEach((b,i)=>{b.disabled=true;if(i===q.ans)b.classList.add('reveal');});
+  const ex=document.getElementById('explain-bar');
+  ex.textContent='Час вийшов! Правильна відповідь: '+q.opts[q.ans]+'. '+q.explain;
+  ex.className='explain-bar show time';
+  results.push({q:q.text,status:'timeout',correct:q.opts[q.ans]});
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function selectAns(idx){
+  if(answered) return;
+  answered=true;
+  clearInterval(timerInt);
+  const q=qList[qIdx];
+  const btns=document.querySelectorAll('.opt');
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.ans) b.classList.add(idx===q.ans?'correct':'reveal');
+  });
+  const ok=idx===q.ans;
+  if(!ok) btns[idx].classList.add('wrong');
+  const bonus=ok?Math.round(timerVal/timeLimit*50):0;
+  const pts=ok?(50+bonus):0;
+  if(ok) score+=pts;
+  document.getElementById('hud-score').textContent=score;
+  const ex=document.getElementById('explain-bar');
+  if(ok){
+    ex.textContent='Правильно! +'+pts+' очок (включно з бонусом за швидкість). '+q.explain;
+    ex.className='explain-bar show ok';
+    results.push({q:q.text,status:'ok',correct:q.opts[q.ans]});
+  } else {
+    ex.textContent='Неправильно. Правильна відповідь: '+q.opts[q.ans]+'. '+q.explain;
+    ex.className='explain-bar show no';
+    results.push({q:q.text,status:'no',correct:q.opts[q.ans]});
+  }
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx>=qList.length) showResult();
+  else renderQ();
+}
+
+function showResult(){
+  document.getElementById('quiz-screen').style.display='none';
+  document.getElementById('result-screen').style.display='block';
+  const ok=results.filter(r=>r.status==='ok').length;
+  const no=results.filter(r=>r.status==='no').length;
+  const tm=results.filter(r=>r.status==='timeout').length;
+  const pct=ok/qList.length;
+  const ring=document.getElementById('r-ring');
+  ring.textContent=Math.round(pct*100)+'%';
+  ring.className='result-ring '+(pct>=0.8?'gold':pct>=0.5?'bronze':'silver');
+  document.getElementById('r-title').textContent=pct===1?'Ідеальний результат!':pct>=0.8?'Відмінно!':pct>=0.5?'Непогано!':'Потрібно повторити';
+  document.getElementById('r-sub').textContent='Рахунок: '+score+' очок. '+(pct>=0.8?'Ти чудово знаєш тему!':'Перегляни ознаки рівності і спробуй ще раз.');
+  document.getElementById('st-correct').textContent=ok;
+  document.getElementById('st-wrong').textContent=no;
+  document.getElementById('st-time').textContent=tm;
+  document.getElementById('st-score').textContent=score;
+  const rl=document.getElementById('review-list');
+  rl.innerHTML='';
+  results.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='rev-item';
+    const icon=document.createElement('div');
+    icon.className='rev-icon '+(r.status==='ok'?'ok':r.status==='no'?'no':'tm');
+    icon.textContent=r.status==='ok'?'✓':r.status==='no'?'✗':'!';
+    const txt=document.createElement('div');
+    txt.innerHTML=`<div class="rev-q">${r.q}</div>`+(r.status!=='ok'?`<div class="rev-a">Правильно: ${r.correct}</div>`:'');
+    div.appendChild(icon);div.appendChild(txt);
+    rl.appendChild(div);
+  });
+}
+
+function goStart(){
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('start-screen').style.display='block';
+}
+</script>
