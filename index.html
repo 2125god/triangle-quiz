@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ознаки рівності трикутників — Вікторина</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem}
+#app{width:100%;max-width:660px}
+.start-screen{text-align:center;padding:3rem 1.5rem;background:#fff;border-radius:16px;border:1px solid #e5e5e0}
+.start-logo{font-size:48px;margin-bottom:1rem}
+.start-title{font-size:24px;font-weight:500;color:#1a1a18;margin-bottom:.5rem}
+.start-sub{font-size:15px;color:#6b6b67;margin-bottom:2rem;line-height:1.6}
+.diff-row{display:flex;gap:10px;justify-content:center;margin-bottom:1.75rem;flex-wrap:wrap}
+.diff-btn{padding:9px 22px;border:1px solid #d5d5ce;border-radius:24px;font-size:14px;font-weight:500;cursor:pointer;background:#fff;color:#6b6b67;transition:all .15s}
+.diff-btn.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.start-btn{padding:13px 44px;border:1px solid #d5d5ce;border-radius:10px;font-size:16px;font-weight:500;cursor:pointer;background:#fff;color:#1a1a18;transition:background .15s}
+.start-btn:hover{background:#f5f5f0}
+
+.quiz-screen{display:none}
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.hud-item{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:8px 14px;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.hud-label{font-size:11px;color:#9b9b96;text-transform:uppercase;letter-spacing:.05em}
+.hud-val{font-size:17px;font-weight:500;color:#1a1a18}
+.timer-bar-wrap{flex:1;height:6px;background:#e5e5e0;border-radius:3px;overflow:hidden}
+.timer-bar{height:100%;border-radius:3px;background:#1D9E75;transition:width .1s linear,background .3s}
+.timer-bar.warn{background:#BA7517}
+.timer-bar.danger{background:#E24B4A}
+
+.q-card{border:1px solid #e5e5e0;border-radius:14px;padding:1.5rem;background:#fff;margin-bottom:1rem}
+.q-meta{font-size:11px;color:#9b9b96;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between}
+.q-badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
+.q-badge.easy{background:#e1f5ee;color:#085041}
+.q-badge.medium{background:#faeeda;color:#633806}
+.q-badge.hard{background:#fcebeb;color:#791f1f}
+.q-text{font-size:16px;font-weight:500;color:#1a1a18;line-height:1.5;margin-bottom:1.25rem}
+.q-svg{display:flex;justify-content:center;margin-bottom:1rem}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:480px){.opts{grid-template-columns:1fr}}
+.opt{padding:12px 14px;border:1px solid #d5d5ce;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;background:#fff;color:#1a1a18;text-align:left;line-height:1.4;transition:all .15s;display:flex;align-items:center;gap:8px}
+.opt:hover:not(:disabled){background:#f5f5f0;border-color:#b5b5ae}
+.opt-letter{width:22px;height:22px;border-radius:50%;border:1px solid #d5d5ce;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#9b9b96}
+.opt.correct{background:#e1f5ee;border-color:#1D9E75;color:#085041}
+.opt.correct .opt-letter{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.opt.wrong{background:#fcebeb;border-color:#E24B4A;color:#791f1f}
+.opt.wrong .opt-letter{background:#E24B4A;border-color:#E24B4A;color:#fff}
+.opt.reveal{background:#e1f5ee;border-color:#1D9E75;color:#085041;opacity:.7}
+.opt.reveal .opt-letter{background:#1D9E75;border-color:#1D9E75;color:#fff}
+
+.explain-bar{border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:1rem;display:none}
+.explain-bar.show{display:block}
+.explain-bar.ok{background:#e1f5ee;color:#085041;border:1px solid #1D9E75}
+.explain-bar.no{background:#fcebeb;color:#791f1f;border:1px solid #E24B4A}
+.explain-bar.time{background:#faeeda;color:#633806;border:1px solid #BA7517}
+
+.next-btn{width:100%;padding:12px;border:1px solid #d5d5ce;border-radius:10px;background:#fff;font-size:14px;font-weight:500;cursor:pointer;color:#1a1a18;transition:background .15s;display:none}
+.next-btn.show{display:block}
+.next-btn:hover{background:#f5f5f0}
+
+.result-screen{display:none;text-align:center;padding:2rem;background:#fff;border-radius:16px;border:1px solid #e5e5e0}
+.result-ring{width:100px;height:100px;border-radius:50%;border:3px solid #e5e5e0;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:28px;font-weight:500;color:#1a1a18}
+.result-ring.gold{border-color:#BA7517;color:#633806;background:#faeeda}
+.result-ring.silver{border-color:#888780;color:#444441;background:#f1efe8}
+.result-ring.bronze{border-color:#1D9E75;color:#085041;background:#e1f5ee}
+.result-title{font-size:22px;font-weight:500;color:#1a1a18;margin-bottom:.4rem}
+.result-sub{font-size:14px;color:#6b6b67;margin-bottom:1.5rem;line-height:1.6}
+.stats-row{display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+.stat{flex:1;min-width:100px;background:#f5f5f0;border-radius:10px;padding:12px;text-align:center}
+.stat-n{font-size:22px;font-weight:500;color:#1a1a18}
+.stat-l{font-size:11px;color:#9b9b96;margin-top:3px}
+.review-list{margin-bottom:1.5rem;text-align:left}
+.rev-item{border:1px solid #e5e5e0;border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:13px;display:flex;align-items:flex-start;gap:10px}
+.rev-icon{width:20px;height:20px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.rev-icon.ok{background:#1D9E75;color:#fff}
+.rev-icon.no{background:#E24B4A;color:#fff}
+.rev-icon.tm{background:#BA7517;color:#fff}
+.rev-q{color:#1a1a18;line-height:1.4;flex:1}
+.rev-a{color:#6b6b67;font-size:12px;margin-top:3px}
+.restart-btn{padding:12px 40px;border:1px solid #d5d5ce;border-radius:10px;background:#fff;font-size:15px;font-weight:500;cursor:pointer;color:#1a1a18;transition:background .15s}
+.restart-btn:hover{background:#f5f5f0}
+
+@media(prefers-color-scheme:dark){
+body{background:#1a1a18}
+.start-screen,.q-card,.result-screen,.hud-item,.opt,.next-btn,.restart-btn{background:#2a2a28;border-color:#3a3a38;color:#e5e5e0}
+.start-title,.q-text,.hud-val,.result-title,.stat-n,.rev-q{color:#e5e5e0}
+.start-sub,.q-meta,.hud-label,.result-sub,.stat-l,.rev-a{color:#9b9b96}
+.opt:hover:not(:disabled){background:#333330}
+.diff-btn{background:#2a2a28;border-color:#3a3a38;color:#9b9b96}
+.diff-btn.active{background:#e5e5e0;color:#1a1a18;border-color:#e5e5e0}
+.start-btn:hover,.next-btn:hover,.restart-btn:hover{background:#333330}
+.opt-letter{border-color:#3a3a38;color:#9b9b96}
+.opt.correct{background:#04342c;border-color:#1D9E75;color:#9fe1cb}
+.opt.wrong{background:#501313;border-color:#E24B4A;color:#f7c1c1}
+.opt.reveal{background:#04342c;border-color:#1D9E75;color:#9fe1cb;opacity:.7}
+.explain-bar.ok{background:#04342c;color:#9fe1cb}
+.explain-bar.no{background:#501313;color:#f7c1c1}
+.explain-bar.time{background:#412402;color:#fac775}
+.q-badge.easy{background:#04342c;color:#9fe1cb}
+.q-badge.medium{background:#412402;color:#fac775}
+.q-badge.hard{background:#501313;color:#f7c1c1}
+.stat{background:#333330}
+.rev-item{border-color:#3a3a38}
+.result-ring.gold{background:#412402;border-color:#BA7517;color:#fac775}
+.result-ring.silver{background:#333330;border-color:#888780;color:#d3d1c7}
+.result-ring.bronze{background:#04342c;border-color:#1D9E75;color:#9fe1cb}
+.timer-bar-wrap{background:#3a3a38}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="start-screen" class="start-screen">
+  <div class="start-logo">📐</div>
+  <div class="start-title">Ознаки рівності трикутників</div>
+  <div class="start-sub">Вікторина з таймером — 12 питань.<br>Відповідай швидко — за швидку відповідь отримуєш бонусні очки!</div>
+  <div class="diff-row">
+    <button class="diff-btn" onclick="setDiff('easy',this)">Легко <span style="font-size:11px;opacity:.6">20 с</span></button>
+    <button class="diff-btn active" onclick="setDiff('medium',this)">Середньо <span style="font-size:11px;opacity:.6">15 с</span></button>
+    <button class="diff-btn" onclick="setDiff('hard',this)">Складно <span style="font-size:11px;opacity:.6">10 с</span></button>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">▶ Старт</button>
+</div>
+
+<div id="quiz-screen" class="quiz-screen">
+  <div class="hud">
+    <div class="hud-item">
+      <span class="hud-label">Питання</span>
+      <span class="hud-val" id="hud-q">1 / 12</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Рахунок</span>
+      <span class="hud-val" id="hud-score">0</span>
+    </div>
+    <div class="hud-item" style="min-width:52px">
+      <span class="hud-label">Час</span>
+      <span class="hud-val" id="hud-time">15</span>
+    </div>
+    <div style="flex:1;padding:4px 0">
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    </div>
+  </div>
+  <div class="q-card">
+    <div class="q-meta">
+      <span id="q-num-label" style="font-size:11px;color:#9b9b96"></span>
+      <span class="q-badge" id="q-badge">середньо</span>
+    </div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-svg" id="q-svg"></div>
+    <div class="opts" id="opts"></div>
+  </div>
+  <div class="explain-bar" id="explain-bar"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQ()">Далі →</button>
+</div>
+
+<div id="result-screen" class="result-screen">
+  <div class="result-ring" id="r-ring"></div>
+  <div class="result-title" id="r-title"></div>
+  <div class="result-sub" id="r-sub"></div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-n" id="st-correct"></div><div class="stat-l">правильно</div></div>
+    <div class="stat"><div class="stat-n" id="st-wrong"></div><div class="stat-l">помилок</div></div>
+    <div class="stat"><div class="stat-n" id="st-time"></div><div class="stat-l">часу вийшло</div></div>
+    <div class="stat"><div class="stat-n" id="st-score"></div><div class="stat-l">очків</div></div>
+  </div>
+  <div class="review-list" id="review-list"></div>
+  <button class="restart-btn" onclick="goStart()">↺ Грати знову</button>
+</div>
+
+</div>
+<script>
+const SVGS={
+  sks:`<svg width="110" height="80" viewBox="0 0 110 80"><polygon points="8,72 55,8 102,72" fill="none" stroke="#1D9E75" stroke-width="1.5"/><line x1="8" y1="72" x2="55" y2="8" stroke="#E24B4A" stroke-width="2.5"/><line x1="55" y1="8" x2="102" y2="72" stroke="#378ADD" stroke-width="2.5"/><path d="M55,8 Q46,25 63,26" fill="none" stroke="#BA7517" stroke-width="1.5"/><text x="26" y="50" font-size="11" fill="#E24B4A" text-anchor="middle">a</text><text x="57" y="11" font-size="11" fill="#BA7517">∠</text><text x="82" y="50" font-size="11" fill="#378ADD">b</text></svg>`,
+  ksk:`<svg width="110" height="80" viewBox="0 0 110 80"><polygon points="10,72 100,72 55,12" fill="none" stroke="#1D9E75" stroke-width="1.5"/><line x1="10" y1="72" x2="100" y2="72" stroke="#E24B4A" stroke-width="2.5"/><path d="M10,72 Q20,62 27,72" fill="none" stroke="#378ADD" stroke-width="1.5"/><path d="M100,72 Q90,62 83,72" fill="none" stroke="#378ADD" stroke-width="1.5"/><text x="55" y="79" font-size="11" fill="#E24B4A" text-anchor="middle">c</text><text x="9" y="70" font-size="11" fill="#378ADD">α</text><text x="86" y="70" font-size="11" fill="#378ADD">β</text></svg>`,
+  sss:`<svg width="110" height="80" viewBox="0 0 110 80"><polygon points="55,8 102,72 8,72" fill="none" stroke="#1D9E75" stroke-width="1.5"/><line x1="55" y1="8" x2="102" y2="72" stroke="#E24B4A" stroke-width="2"/><line x1="55" y1="8" x2="8" y2="72" stroke="#378ADD" stroke-width="2"/><line x1="8" y1="72" x2="102" y2="72" stroke="#BA7517" stroke-width="2"/><text x="82" y="46" font-size="11" fill="#E24B4A">a</text><text x="22" y="46" font-size="11" fill="#378ADD">b</text><text x="52" y="79" font-size="11" fill="#BA7517">c</text></svg>`,
+  right:`<svg width="110" height="80" viewBox="0 0 110 80"><polygon points="12,72 12,14 95,72" fill="none" stroke="#1D9E75" stroke-width="1.5"/><rect x="12" y="62" width="10" height="10" fill="none" stroke="#1D9E75" stroke-width="1.2"/><line x1="12" y1="14" x2="95" y2="72" stroke="#E24B4A" stroke-width="2.5"/><text x="52" y="78" font-size="10" fill="#E24B4A" text-anchor="middle">гіпот.</text></svg>`,
+  none:``
+};
+
+const ALL_Q=[
+  {text:"Яка ознака: дві сторони і кут між ними?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Четверта"],ans:0,diff:"easy",svg:"sks",explain:"Перша ознака (С–К–С): дві сторони і КУТ МІЖ НИМИ. Головне — кут знаходиться саме між двома рівними сторонами."},
+  {text:"Яка ознака: сторона і два прилеглих кути?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Немає такої"],ans:1,diff:"easy",svg:"ksk",explain:"Друга ознака (К–С–К): сторона і два кути, що прилягають до неї з обох боків."},
+  {text:"Яка ознака: три сторони рівні?",opts:["Перша","Друга","Третя (С–С–С)","Жодна"],ans:2,diff:"easy",svg:"sss",explain:"Третя ознака (С–С–С): якщо всі три сторони рівні — трикутники рівні."},
+  {text:"△ABC і △DEF: AB=DE, ∠B=∠E, BC=EF. Яка ознака?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Недостатньо даних"],ans:0,diff:"medium",svg:"sks",explain:"AB=DE та BC=EF — дві сторони. ∠B=∠E — кут між ними. Це перша ознака."},
+  {text:"△ABC і △KMN: ∠A=∠K, AB=KM, ∠B=∠M. Яка ознака?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Неможливо визначити"],ans:1,diff:"medium",svg:"ksk",explain:"AB=KM — сторона. ∠A=∠K та ∠B=∠M — два кути, що прилягають до неї. Це друга ознака."},
+  {text:"Чи рівні трикутники, якщо у них рівні три кути?",opts:["Так, за третьою ознакою","Ні — вони лише подібні","Так, за другою ознакою","Тільки для прямокутних"],ans:1,diff:"medium",svg:"none",explain:"Рівність трьох кутів — ознака ПОДІБНОСТІ, а не рівності. Трикутники можуть мати однакові кути, але різні розміри."},
+  {text:"Дві сторони і кут, що НЕ лежить між ними. Цього достатньо?",opts:["Так, це перша ознака","Ні — недостатня умова","Так, для гострих трикутників","Так, якщо трикутники прямокутні"],ans:1,diff:"hard",svg:"none",explain:"Кут має бути САМЕ МІЖ двома сторонами. Якщо кут не між ними — можна побудувати два різних трикутника."},
+  {text:"Для прямокутних трикутників: рівні гіпотенуза і один катет. Яка ознака?",opts:["Гіпотенуза і катет","Перша ознака (С–К–С)","Друга ознака (К–С–К)","Третя ознака (С–С–С)"],ans:0,diff:"medium",svg:"right",explain:"Для прямокутних трикутників є окрема ознака: рівність гіпотенузи і катета достатня для рівності."},
+  {text:"Скільки ознак рівності довільних трикутників?",opts:["2","3","4","5"],ans:1,diff:"easy",svg:"none",explain:"Три класичні ознаки: перша (С–К–С), друга (К–С–К), третя (С–С–С)."},
+  {text:"△ABC=△DEF означає, що...",opts:["Трикутники подібні","Збігаються при накладанні","Рівні тільки кути","Рівні тільки сторони"],ans:1,diff:"easy",svg:"none",explain:"Знак = між трикутниками означає рівність — вони збігаються при накладанні. Рівні всі відповідні сторони і кути."},
+  {text:"AB=PQ, AC=PR, BC=QR. Яка ознака рівності △ABC і △PQR?",opts:["Перша (С–К–С)","Друга (К–С–К)","Третя (С–С–С)","Недостатньо даних"],ans:2,diff:"medium",svg:"sss",explain:"Три пари рівних сторін — третя ознака (С–С–С)."},
+  {text:"Яка умова є зайвою, якщо задана перша ознака (С–К–С)?",opts:["Третя сторона","Другий кут","Обидві зайві","Жодна — потрібні всі"],ans:2,diff:"hard",svg:"none",explain:"Якщо відомі дві сторони і кут між ними, трикутник повністю визначений. Третя сторона і решта кутів визначаються автоматично."}
+];
+
+let diff='medium',timeLimit=15,qList=[],qIdx=0,score=0,timerVal=0,timerInt=null,answered=false,results=[];
+
+function setDiff(d,btn){
+  diff=d;
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function startQuiz(){
+  timeLimit=diff==='easy'?20:diff==='medium'?15:10;
+  qList=[...ALL_Q].sort(()=>Math.random()-.5);
+  qIdx=0;score=0;results=[];
+  document.getElementById('start-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  renderQ();
+}
+
+function renderQ(){
+  answered=false;
+  const q=qList[qIdx];
+  document.getElementById('hud-q').textContent=(qIdx+1)+' / '+qList.length;
+  document.getElementById('hud-score').textContent=score;
+  document.getElementById('q-num-label').textContent='Питання '+(qIdx+1);
+  const badge=document.getElementById('q-badge');
+  badge.textContent=q.diff==='easy'?'легко':q.diff==='medium'?'середньо':'складно';
+  badge.className='q-badge '+(q.diff==='easy'?'easy':q.diff==='medium'?'medium':'hard');
+  document.getElementById('q-text').textContent=q.text;
+  document.getElementById('q-svg').innerHTML=SVGS[q.svg]||'';
+  const opts=document.getElementById('opts');
+  const letters=['А','Б','В','Г'];
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt';
+    btn.innerHTML=`<span class="opt-letter">${letters[i]}</span>${o}`;
+    btn.onclick=()=>selectAns(i);
+    opts.appendChild(btn);
+  });
+  document.getElementById('explain-bar').className='explain-bar';
+  document.getElementById('explain-bar').textContent='';
+  document.getElementById('next-btn').className='next-btn';
+  startTimer();
+}
+
+function startTimer(){
+  timerVal=timeLimit;
+  clearInterval(timerInt);
+  updateTimerUI();
+  timerInt=setInterval(()=>{
+    timerVal--;
+    updateTimerUI();
+    if(timerVal<=0){clearInterval(timerInt);onTimeout();}
+  },1000);
+}
+
+function updateTimerUI(){
+  document.getElementById('hud-time').textContent=timerVal;
+  const pct=timerVal/timeLimit*100;
+  const bar=document.getElementById('timer-bar');
+  bar.style.width=pct+'%';
+  bar.className='timer-bar'+(pct<=30?' danger':pct<=60?' warn':'');
+}
+
+function onTimeout(){
+  if(answered)return;
+  answered=true;
+  const q=qList[qIdx];
+  document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(i===q.ans)b.classList.add('reveal');});
+  const ex=document.getElementById('explain-bar');
+  ex.textContent='Час вийшов! Правильна відповідь: '+q.opts[q.ans]+'. '+q.explain;
+  ex.className='explain-bar show time';
+  results.push({q:q.text,status:'timeout',correct:q.opts[q.ans]});
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function selectAns(idx){
+  if(answered)return;
+  answered=true;
+  clearInterval(timerInt);
+  const q=qList[qIdx];
+  document.querySelectorAll('.opt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.ans)b.classList.add(idx===q.ans?'correct':'reveal');
+  });
+  const ok=idx===q.ans;
+  if(!ok)document.querySelectorAll('.opt')[idx].classList.add('wrong');
+  const bonus=ok?Math.round(timerVal/timeLimit*50):0;
+  const pts=ok?(50+bonus):0;
+  if(ok)score+=pts;
+  document.getElementById('hud-score').textContent=score;
+  const ex=document.getElementById('explain-bar');
+  if(ok){
+    ex.textContent='Правильно! +'+pts+' очок (бонус за швидкість). '+q.explain;
+    ex.className='explain-bar show ok';
+    results.push({q:q.text,status:'ok',correct:q.opts[q.ans]});
+  }else{
+    ex.textContent='Неправильно. Правильна відповідь: '+q.opts[q.ans]+'. '+q.explain;
+    ex.className='explain-bar show no';
+    results.push({q:q.text,status:'no',correct:q.opts[q.ans]});
+  }
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx>=qList.length)showResult();
+  else renderQ();
+}
+
+function showResult(){
+  document.getElementById('quiz-screen').style.display='none';
+  document.getElementById('result-screen').style.display='block';
+  const ok=results.filter(r=>r.status==='ok').length;
+  const no=results.filter(r=>r.status==='no').length;
+  const tm=results.filter(r=>r.status==='timeout').length;
+  const pct=ok/qList.length;
+  const ring=document.getElementById('r-ring');
+  ring.textContent=Math.round(pct*100)+'%';
+  ring.className='result-ring '+(pct>=0.8?'gold':pct>=0.5?'bronze':'silver');
+  document.getElementById('r-title').textContent=pct===1?'Ідеальний результат!':pct>=0.8?'Відмінно!':pct>=0.5?'Непогано!':'Потрібно повторити';
+  document.getElementById('r-sub').textContent='Рахунок: '+score+' очок. '+(pct>=0.8?'Ти чудово знаєш тему!':'Перегляни ознаки рівності і спробуй ще раз.');
+  document.getElementById('st-correct').textContent=ok;
+  document.getElementById('st-wrong').textContent=no;
+  document.getElementById('st-time').textContent=tm;
+  document.getElementById('st-score').textContent=score;
+  const rl=document.getElementById('review-list');
+  rl.innerHTML='';
+  results.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='rev-item';
+    const icon=document.createElement('div');
+    icon.className='rev-icon '+(r.status==='ok'?'ok':r.status==='no'?'no':'tm');
+    icon.textContent=r.status==='ok'?'✓':r.status==='no'?'✗':'!';
+    const txt=document.createElement('div');
+    txt.innerHTML=`<div class="rev-q">${r.q}</div>`+(r.status!=='ok'?`<div class="rev-a">Правильно: ${r.correct}</div>`:'');
+    div.appendChild(icon);div.appendChild(txt);
+    rl.appendChild(div);
+  });
+}
+
+function goStart(){
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('start-screen').style.display='block';
+}
+</script>
+</body>
+</html>
